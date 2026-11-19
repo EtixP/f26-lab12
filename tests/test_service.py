@@ -37,6 +37,20 @@ def test_a_full_statement_withholds_nothing(booking):
     assert statement.adjustments == ("settled under the full tier",)
 
 
+def test_statements_built_without_notes_do_not_share_them(booking):
+    first = service.build_statement(booking, 12000, "full")
+    second = service.build_statement(booking, 9000, "standard")
+    assert first.adjustments == ("settled under the full tier",)
+    assert second.adjustments[0] == "settled under the standard tier"
+    assert "settled under the full tier" not in second.adjustments
+
+
+def test_a_cancellation_after_the_start_is_a_no_show_and_settles_at_zero(booking, cancellation):
+    statement = service.decide_refund(booking, cancellation(utc(2026, 3, 10, 14, 30)))
+    assert statement.refund_cents == 0
+    assert statement.withheld_cents == 12000
+
+
 def test_a_partial_statement_records_what_was_withheld(booking):
     statement = service.build_statement(booking, 9000, "standard", adjustments=["batch 2026-03"])
     assert statement.withheld_cents == 3000
