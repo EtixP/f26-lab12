@@ -1,1 +1,2 @@
-babel==2.9.0
+# Runtime dependencies of the refund service.
+# None at the moment: the service uses only the standard library.
